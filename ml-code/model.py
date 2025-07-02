@@ -6,7 +6,7 @@ class ResidualBlock(nn.Module):
         super().__init__()
         self.conv1 = nn.Conv2d(in_channels, out_channels, 3, stride, padding=1, bias=False)
         self.bn1 = nn.BatchNorm2d(out_channels) # batch normalization 1
-        self.conv2 = nn.Conv2d(out_channels, out_channels, 3, stride, padding=1, bias=False)
+        self.conv2 = nn.Conv2d(out_channels, out_channels, 3, stride=1, padding=1, bias=False)
         self.bn2 = nn.BatchNorm2d(out_channels) # batch normalization 1
         self.shortcut = nn.Sequential()
         self.use_shortcut = stride != 1 or in_channels != out_channels
@@ -35,6 +35,7 @@ class AudioCNN(nn.Module):
             nn.ReLU(inplace=True),
             nn.MaxPool2d(3, stride=2, padding=1)
         )
+        
         # residual layers
         self.layer1 = nn.ModuleList([ResidualBlock(64, 64) for _ in range(3)])
         self.layer2 = nn.ModuleList([ResidualBlock(64, 128, stride=2)]+[ResidualBlock(128, 128) for _ in range(3)])
