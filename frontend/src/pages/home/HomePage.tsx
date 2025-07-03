@@ -1,5 +1,8 @@
+"use client";
 import { useState } from "react";
 import { Button } from "../../components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
 
 interface Prediction{
     class: string;
@@ -45,11 +48,33 @@ const HomePage = () => {
         const reader = new FileReader();
         reader.readAsArrayBuffer(file);
         reader.onload = async () => {
-            const arrayBuffer = reader.result as ArrayBuffer;
-            const base64String = btoa(new Uint8Array(arrayBuffer).reduce((data, byte) => {return data+String.fromCharCode(byte)}, ""));
-            
+            const api_url = "";
+            try{
+                const arrayBuffer = reader.result as ArrayBuffer;
+                const base64String = btoa(new Uint8Array(arrayBuffer).reduce((data, byte) => {return data+String.fromCharCode(byte)}, ""));
+                const response = await fetch(api_url, {
+                    method: "POST",
+                    headers: {"Content-Type": "application/json"},
+                    body: JSON.stringify({audio_data: base64String})
+                });
+                if(!response.ok){
+                    throw new Error(`API error: ${response.statusText}`);
+                }
+                const data:APIResponse = await response.json();
+                setVizData(data);
+            }
+            catch(err){
+                setError(err instanceof Error? err.message: "An Unknown error occurred");
+            }
+            finally{
+                setIsLoading(false);
+            }
+        };
+        reader.onerror = () => {
+            setError("Failed to read file");
+            setIsLoading(false);
         }
-    }
+    };
 
     return <main className="min-h-screen bg-stone-50 p-8">
         <div className="mx-auto max-w-[60%]">
@@ -62,11 +87,17 @@ const HomePage = () => {
                 </p>
                 <div className="flex flex-col items-center">
                     <div className="relative inline-block">
-                        <input type="file" accept=".wav" id="file-upload" disabled={isLoading} className="absolute inset-0 w-full cursor-pointer opacity-0"/>
+                        <input type="file" accept=".wav" id="file-upload" disabled={isLoading} className="absolute inset-0 w-full cursor-pointer opacity-0" onChange={handleFileChange}/>
                         <Button variant="outline" size="lg" className="border-stone-100" disabled={isLoading}>{isLoading?"Analyzing...": "Choose a file"}</Button>
                     </div>
+                    {true && (<Badge variant="secondary" className="mt-4 bg-stone-200 text-stone-800">{fileName}</Badge>)}
                 </div>
             </div>
+            {error && (<Card className="mb-8 border-red-200 bg-red-300">
+                <CardContent>
+                    <p className="text-red-600">Error: {error}</p>
+                </CardContent>
+            </Card>)}
         </div>
     </main>
 }
