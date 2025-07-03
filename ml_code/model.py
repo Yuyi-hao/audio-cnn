@@ -13,7 +13,7 @@ class ResidualBlock(nn.Module):
         if self.use_shortcut:
             self.shortcut = nn.Sequential(nn.Conv2d(in_channels, out_channels, 1, stride=stride, bias=False), nn.BatchNorm2d(out_channels))
 
-    def forward(self, x):
+    def forward(self, x, feature_map_dict=None, prefix=""):
         out = self.conv1(x)
         out = self.bn1(out)
         out = torch.relu(out)
@@ -21,7 +21,13 @@ class ResidualBlock(nn.Module):
         out = self.bn2(out)
         out = torch.relu(out)
         shortcut = self.shortcut(x) if self.use_shortcut else x
-        return torch.relu(out+shortcut)
+        out_add = out+shortcut
+        if feature_map_dict is not None:
+            feature_map_dict[f"{prefix}.conv"] = out_add
+        out = torch.relu(out+shortcut)
+        if feature_map_dict is not None:
+            feature_map_dict[f"{prefix}.relu"] = out
+        return out
 
 
 
@@ -46,20 +52,30 @@ class AudioCNN(nn.Module):
         self.dropout = nn.Dropout(0.5)
         self.fc = nn.Linear(512, num_classes)
     
-    def forward(self, x):
+    def forward(self, x, return_feature_maps=False):
+        feature_maps = {}
         x = self.conv1(x)
-        for block in self.layer1:
-            x = block(x)
-        for block in self.layer2:
-            x = block(x)
-        for block in self.layer3:
-            x = block(x)
-        for block in self.layer4:
-            x = block(x)
+        feature_maps["conv1"] = x
+
+        for idx, block in enumerate(self.layer1):
+            x = block(x, feature_maps, prefix=f"Layer1.block{idx}")
+        feature_maps["layer1"] = x
+        for idx, block in enumerate(self.layer2):
+            x = block(x, feature_maps, prefix=f"Layer2.block{idx}")
+        feature_maps["layer2"] = x
+        for idx, block in enumerate(self.layer3):
+            x = block(x, feature_maps, prefix=f"Layer3.block{idx}")
+        feature_maps["layer3"] = x
+        for idx, block in enumerate(self.layer4):
+            x = block(x, feature_maps, prefix=f"Layer4.block{idx}")
+        feature_maps["layer4"] = x
 
         x = self.avgPool(x)
         x = x.view(x.size(0), -1)
         x = self.dropout(x)
         x = self.fc(x)
-        return x
+        if not return_feature_maps:
+            return x
+        else:
+            return x, feature_maps
 
