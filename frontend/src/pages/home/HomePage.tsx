@@ -4,6 +4,9 @@ import { Button } from "../../components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress"
+import FeatureMap from "@/components/FeatureMap";
+import ColorScale from "@/components/ColorScale";
+import Waveform from "@/components/Waveform";
 
 interface Prediction{
     class: string;
@@ -137,7 +140,6 @@ const HomePage = () => {
                     headers: {"Content-Type": "application/json"},
                     body: JSON.stringify({audio_data: base64String})
                 });
-                console.log(response);
                 if(!response.ok){
                     throw new Error(`API error: ${response.statusText}`);
                 }
@@ -163,7 +165,7 @@ const HomePage = () => {
             }
         };
     }, [audioURL]);
-    // const {main, internals} = vizData?splitLayers(vizData?.visualization):{main:[], internals: {}};
+    const {main, internals} = vizData?splitLayers(vizData?.visualization):{main:[], internals: {}};
 
     return <main className="min-h-screen bg-stone-50 p-8">
         <div className="mx-auto max-w-[60%]">
@@ -225,10 +227,74 @@ const HomePage = () => {
                             <CardTitle className="text-stone-900">Input Spectrogram</CardTitle>
                         </CardHeader>
                         <CardContent>
+                            <FeatureMap
+                                data={vizData.input_spectrogram.values}
+                                title={`${vizData.input_spectrogram.shape.join(" x ")}`}
+                                spectrogram
+                            />
+                            <div className="mt-5 flex justify-end">
+                                <ColorScale width={200} height={16} min={-1} max={1} />
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    <Card>
+                        <CardHeader>
+                            <CardTitle className="text-stone-900">
+                                Audio Waveform
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <Waveform
+                                data={vizData.waveform.values}
+                                title={`${vizData.waveform.duration.toFixed(2)}s * ${vizData.waveform.sample_rate}Hz`}
+                            />
                         </CardContent>
                     </Card>
                 </div>
 
+                {/* Feature maps */}
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Convolution Layer Outputs</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="grid grid-cols-5 gap-6">
+                            {main.map(([mainName, mainData]) => (
+                                <div className="space-y-4" key={mainName}>
+                                    <div>
+                                        <h4 className="mb-2 font-medium text-stone-700">{mainName}</h4>
+                                        <FeatureMap
+                                            data={mainData.values}
+                                            title={`${mainData.shape.join(" x ")}`}
+                                        />
+                                    </div>
+
+                                    {internals[mainName] && (
+                                        <div className="h-80 overflow-y-auto rounded border border-stone-200 bg-stone-50 p-2">
+                                            <div className="space-y-2">
+                                                {internals[mainName]
+                                                .sort(([a], [b]) => a.toString().localeCompare(b.toString()))
+                                                .map(([layerName, layerData]) => (
+                                                    <FeatureMap
+                                                        key={layerName.toString()}
+                                                        data={layerData.values}
+                                                        title={layerName.replace(`${mainName}.`, "")}
+                                                        internal={true}
+                                                    />
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                </div>
+                            ))}
+                        </div>
+                        <div className="mt-5 flex justify-end">
+                            <ColorScale width={200} height={16} min={-1} max={1} />
+                        </div>
+                    </CardContent>
+                </Card>
 
             </div>)}
         </div>
