@@ -2,9 +2,12 @@ from ml_code.main import predict_audio_from_model
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 import json
+import os
+from dotenv import load_dotenv
+load_dotenv()
 
 app = Flask(__name__)
-CORS(app, origins=["http://localhost:5173"])
+CORS(app, origins=[os.getenv("FRONTEND_URL")])
 
 
 @app.route("/predict/", methods=['POST', 'GET'])
@@ -17,4 +20,4 @@ def predict_sound():
     return jsonify(result)
 
 if __name__=="__main__":
-    app.run(debug=True)
+    app.run(debug=os.getenv("DEBUG")=="True")

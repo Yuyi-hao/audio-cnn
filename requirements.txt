@@ -29,6 +29,7 @@ platformdirs==4.3.8
 pooch==1.8.2
 pycparser==2.22
 python-dateutil==2.9.0.post0
+python-dotenv==1.1.1
 pytz==2025.2
 requests==2.32.4
 scikit-learn==1.7.0
