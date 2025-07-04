@@ -10,7 +10,7 @@ app = Flask(__name__)
 CORS(app, origins=[os.getenv("FRONTEND_URL")])
 
 
-@app.route("/predict/", methods=['POST', 'GET'])
+@app.route("/predict/", methods=['POST'])
 def predict_sound():
     data = request.data
     data = data.decode('utf-8')
