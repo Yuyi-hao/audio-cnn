@@ -87,7 +87,7 @@ def mixup_criterion(criterion, pred, y_a, y_b, lam):
     return lam * criterion(pred, y_a) + (1 - lam) * criterion(pred, y_b)
 
 # data preparation
-es50_dataset = "ESC-50-dataset"
+es50_dataset = "../ESC-50-dataset"
 
 train_dataset = ESC50Dataset(data_directory=es50_dataset, metadata_file=os.path.join(es50_dataset, "meta", "esc50.csv"), split="train", transformer=train_transformer)
 val_dataset = ESC50Dataset(data_directory=es50_dataset, metadata_file=os.path.join(es50_dataset, "meta", "esc50.csv"), split="val", transformer=train_transformer)
