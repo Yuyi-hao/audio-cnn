@@ -131,7 +131,7 @@ const HomePage = () => {
         const reader = new FileReader();
         reader.readAsArrayBuffer(file);
         reader.onload = async () => {
-            const api_url = "http://127.0.0.1:5000/predict/";
+            const api_url = "https://audio-cnn.onrender.com/predict/";
             try{
                 const arrayBuffer = reader.result as ArrayBuffer;
                 const base64String = btoa(new Uint8Array(arrayBuffer).reduce((data, byte) => {return data+String.fromCharCode(byte)}, ""));
