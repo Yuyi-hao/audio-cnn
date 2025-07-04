@@ -1,12 +1,12 @@
 "use client";
 import { useEffect, useState } from "react";
-import { Button } from "../../components/ui/button";
-import { Badge } from "../../components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";
-import { Progress } from "../../components/ui/progress"
-import FeatureMap from "../../components/FeatureMap";
-import ColorScale from "../../components/ColorScale";
-import Waveform from "../../components/Waveform";
+import { Button } from "../../components/ui/button.tsx";
+import { Badge } from "../../components/ui/badge.tsx";
+import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card.tsx";
+import { Progress } from "../../components/ui/progress.tsx"
+import FeatureMap from "../../components/FeatureMap.tsx";
+import ColorScale from "../../components/ColorScale.tsx";
+import Waveform from "../../components/Waveform.tsx";
 
 interface Prediction{
     class: string;

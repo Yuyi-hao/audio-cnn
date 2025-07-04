@@ -1,5 +1,5 @@
 import { useRef, useEffect } from "react";
-import getColor from "../lib/colors";
+import getColor from "../lib/colors.ts";
 
 const FeatureMap = ({
   data,
