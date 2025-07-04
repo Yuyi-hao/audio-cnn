@@ -5,6 +5,7 @@ import json
 import os
 from dotenv import load_dotenv
 import traceback
+import base64
 
 load_dotenv()
 
@@ -18,9 +19,15 @@ def predict_sound():
         data = request.data
         data = data.decode('utf-8')
         data = json.loads(data)
-        audio_data = data['audio_data']
+        audio_data = data.get('audio_data')
         if not audio_data:
             return jsonify({"error": "Missing 'audio_data' in request"}), 400
+        
+        # Test decoding before passing to model
+        try:
+            base64.b64decode(audio_data)
+        except Exception:
+            return jsonify({"error": "Invalid base64 audio data"}), 400
         
         result = predict_audio_from_model(audio_data)
         return jsonify(result)
